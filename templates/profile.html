@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+</head>
+<body>
+    <h2>Profile Page</h2>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p style="color: {% if category == 'danger' %}red{% else %}green{% endif %};">
+                    {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Check if user has already entered their details -->
+    {% if user_data %}
+        {% if request.args.get('edit') == 'true' %}
+            <!-- Editable Profile Form -->
+            <form action="{{ url_for('profile') }}" method="POST">
+                <label for="name">Name:</label>
+                <input type="text" name="name" value="{{ user_data.name }}" required><br>
+
+                <label for="age">Age:</label>
+                <input type="number" name="age" value="{{ user_data.age }}" required><br>
+
+                <label for="sex">Sex:</label>
+                <select name="sex" required>
+                    <option value="Male" {% if user_data.sex == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if user_data.sex == 'Female' %}selected{% endif %}>Female</option>
+                </select><br>
+
+                <label for="weight">Weight (kg):</label>
+                <input type="number" name="weight" step="0.1" value="{{ user_data.weight }}" required><br>
+
+                <label for="height">Height (cm):</label>
+                <input type="number" name="height" step="0.1" value="{{ user_data.height }}" required><br>
+
+                <button type="submit" name="update_profile">Save Changes</button>
+            </form>
+
+        {% else %}
+            <!-- Read-Only Profile View -->
+            <p><strong>Name:</strong> {{ user_data.name }}</p>
+            <p><strong>Age:</strong> {{ user_data.age }}</p>
+            <p><strong>Sex:</strong> {{ user_data.sex }}</p>
+            <p><strong>Weight:</strong> {{ user_data.weight }} kg</p>
+            <p><strong>Height:</strong> {{ user_data.height }} cm</p>
+            <p><strong>BMI:</strong> {{ bmi }} ({{ bmi_category }})</p>
+            <p><strong>Ideal Weight Range:</strong> {{ ideal_weight_min }} kg - {{ ideal_weight_max }} kg</p>
+            <a href="{{ url_for('profile', edit='true') }}"><button>Edit Profile</button></a>
+        {% endif %}
+
+        <!-- Predict Form -->
+        <h3>Make a Prediction</h3>
+        <form action="{{ url_for('profile') }}" method="POST">
+            <label for="inactivity_hours">Hours of Inactivity:</label>
+            <input type="number" name="inactivity_hours" step="0.1" required value="{{ request.form.get('inactivity_hours', '') }}"><br>
+
+            <!-- Filters Button -->
+            <button type="button" onclick="toggleFilters()">Filters</button>
+
+            <!-- Filters Section (Initially Hidden) -->
+            <div id="filters-section" style="display: none;">
+                <h3>Filter Your Meal Suggestions</h3>
+                
+                <!-- Cuisine Type -->
+                <label for="cuisine">Cuisine Type:</label>
+                <select name="cuisine">
+                    <option value="">Any</option>
+                    <option value="indian" {% if cuisine == 'indian' %}selected{% endif %}>Indian</option>
+                    <option value="italian" {% if cuisine == 'italian' %}selected{% endif %}>Italian</option>
+                    <option value="mexican" {% if cuisine == 'mexican' %}selected{% endif %}>Mexican</option>
+                    <option value="chinese" {% if cuisine == 'chinese' %}selected{% endif %}>Chinese</option>
+                </select><br>
+
+                <!-- Meal Type -->
+                <label for="meal">Meal Type:</label>
+                <select name="meal">
+                    <option value="">Any</option>
+                    <option value="breakfast" {% if meal == 'breakfast' %}selected{% endif %}>Breakfast</option>
+                    <option value="lunch" {% if meal == 'lunch' %}selected{% endif %}>Lunch</option>
+                    <option value="dinner" {% if meal == 'dinner' %}selected{% endif %}>Dinner</option>
+                    <option value="snack" {% if meal == 'snack' %}selected{% endif %}>Snack</option>
+                </select><br>
+
+                <!-- Dish Type -->
+                <label for="dish">Dish Type:</label>
+                <select name="dish">
+                    <option value="">Any</option>
+                    <option value="salad" {% if dish == 'salad' %}selected{% endif %}>Salad</option>
+                    <option value="soup" {% if dish == 'soup' %}selected{% endif %}>Soup</option>
+                    <option value="dessert" {% if dish == 'dessert' %}selected{% endif %}>Dessert</option>
+                </select><br>
+
+                <!-- Diet Labels -->
+                <label for="diet_label">Diet Labels:</label>
+                <select name="diet_label">
+                    <option value="">Any</option>
+                    <option value="balanced" {% if diet_label == 'balanced' %}selected{% endif %}>Balanced</option>
+                    <option value="high-fiber" {% if diet_label == 'high-fiber' %}selected{% endif %}>High-Fiber</option>
+                    <option value="high-protein" {% if diet_label == 'high-protein' %}selected{% endif %}>High-Protein</option>
+                    <option value="low-carb" {% if diet_label == 'low-carb' %}selected{% endif %}>Low Carb</option>
+                    <option value="low-fat" {% if diet_label == 'low-fat' %}selected{% endif %}>Low Fat</option>
+                </select><br>
+
+                <!-- Vegetarian Checkbox -->
+                <label>Vegetarian:</label>
+                <input type="checkbox" name="vegetarian" value="vegetarian" {% if vegetarian %}checked{% endif %}> Yes<br>
+
+                <button type="submit" name="apply_filters">Apply Filters</button>
+            </div>
+
+            <!-- Applied Filters Display -->
+            {% if diet_label or cuisine or meal or dish or vegetarian %}
+                <p><strong>Applied Filters:</strong></p>
+                <ul>
+                    {% if diet_label %}<li>Diet Label: {{ diet_label }}</li>{% endif %}
+                    {% if cuisine %}<li>Cuisine: {{ cuisine }}</li>{% endif %}
+                    {% if meal %}<li>Meal Type: {{ meal }}</li>{% endif %}
+                    {% if dish %}<li>Dish Type: {{ dish }}</li>{% endif %}
+                    {% if vegetarian %}<li>Vegetarian: Yes</li>{% endif %}
+                </ul>
+            {% endif %}
+
+            <button type="submit" name="predict">Predict</button>
+        </form>
+
+        <!-- JavaScript to Show/Hide Filters -->
+        <script>
+            function toggleFilters() {
+                var filtersSection = document.getElementById("filters-section");
+                filtersSection.style.display = (filtersSection.style.display === "none") ? "block" : "none";
+            }
+        </script>
+
+    {% else %}
+        <h3>Complete Your Profile</h3>
+        <form action="{{ url_for('profile') }}" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" name="name" required><br>
+            <label for="age">Age:</label>
+            <input type="number" name="age" required><br>
+            <label for="sex">Sex:</label>
+            <select name="sex" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select><br>
+            <button type="submit" name="update_profile">Save Profile</button>
+        </form>
+    {% endif %}
+    <br>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>
