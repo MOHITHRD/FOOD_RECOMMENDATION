@@ -1,0 +1,228 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    height: 100vh;
+    /*background: url("../static/images/food_bowl_bkg.jpeg") no-repeat center center;*/
+    background: url("/static/images/bg3.png") no-repeat center center fixed;
+    background-size: cover;
+  }
+  
+  .left {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding-right: 5%;
+  }
+  
+  .bowl-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    z-index: 2;
+    transform: translateX(5%);
+  }
+  
+  .bowl-image {
+    width: 100%;
+    height: auto;
+    border-radius: 60%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    animation: rotate 60s linear infinite;
+  }
+  
+  @keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 350px;
+    background-color: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  h1 {
+    margin-bottom: 5px;
+    color: #2c3e50;
+    font-size: 2.2rem;
+    text-align: center;
+    position: relative;
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  h1::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: #27ae60;
+    border-radius: 2px;
+  }
+  
+  p.tagline {
+    margin-bottom: 30px;
+    font-size: 1rem;
+    color: #7f8c8d;
+    text-align: center;
+    line-height: 1.5;
+  }
+  
+  form {
+    width: 100%;
+  }
+  
+  .input-group {
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #34495e;
+    font-size: 0.9rem;
+  }
+  
+  input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+  }
+  
+  input:focus {
+    outline: none;
+    border-color: #27ae60;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+  }
+  
+  button {
+    width: 100%;
+    padding: 14px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  button:hover {
+    background-color: #219150;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.2);
+  }
+  
+  button:active {
+    transform: translateY(0);
+  }
+  
+  .flash-message {
+    color: red;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 8px;
+    background-color: rgba(255, 0, 0, 0.1);
+    border-radius: 5px;
+  }
+  
+  .login-link {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  a {
+    color: #27ae60;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  a:hover {
+    color: #219150;
+  }
+  
+  .benefits {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+  
+  .benefits-title {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .benefits-grid {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .benefit-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    padding: 0 10px;
+  }
+  
+  .benefit-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(39, 174, 96, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    color: #27ae60;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .benefit-text {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    text-align: center;
+  }

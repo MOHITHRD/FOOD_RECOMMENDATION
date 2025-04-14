@@ -152,6 +152,11 @@
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
             </select><br>
+            <label for="weight">Weight (kg):</label>
+            <input type="number" name="weight" step="0.1" value="{{ user_data.weight }}" required><br>
+
+            <label for="height">Height (cm):</label>
+            <input type="number" name="height" step="0.1" value="{{ user_data.height }}" required><br>
             <button type="submit" name="update_profile">Save Profile</button>
         </form>
     {% endif %}

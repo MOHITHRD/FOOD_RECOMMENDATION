@@ -325,7 +325,7 @@ def get_food_suggestion(proteins, carbs, calories, diet_label=None, cuisine=None
                     "diff": total_diff  # Store how far it is from the target values
                 })
             food_list = sorted(food_list, key=lambda x: x["diff"])
-            return food_list
+            return food_list[:10]
         else:
             return []
     else:
