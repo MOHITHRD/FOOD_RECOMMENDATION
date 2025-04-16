@@ -3,164 +3,530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+    <title>NutriDesk - Profile</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles will be in a separate CSS file as requested -->
+    <link rel="stylesheet" href="/static/css/profile.css">
 </head>
 <body>
-    <h2>Profile Page</h2>
-
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p style="color: {% if category == 'danger' %}red{% else %}green{% endif %};">
-                    {{ message }}
-                </p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <!-- Check if user has already entered their details -->
-    {% if user_data %}
-        {% if request.args.get('edit') == 'true' %}
-            <!-- Editable Profile Form -->
-            <form action="{{ url_for('profile') }}" method="POST">
-                <label for="name">Name:</label>
-                <input type="text" name="name" value="{{ user_data.name }}" required><br>
-
-                <label for="age">Age:</label>
-                <input type="number" name="age" value="{{ user_data.age }}" required><br>
-
-                <label for="sex">Sex:</label>
-                <select name="sex" required>
-                    <option value="Male" {% if user_data.sex == 'Male' %}selected{% endif %}>Male</option>
-                    <option value="Female" {% if user_data.sex == 'Female' %}selected{% endif %}>Female</option>
-                </select><br>
-
-                <label for="weight">Weight (kg):</label>
-                <input type="number" name="weight" step="0.1" value="{{ user_data.weight }}" required><br>
-
-                <label for="height">Height (cm):</label>
-                <input type="number" name="height" step="0.1" value="{{ user_data.height }}" required><br>
-
-                <button type="submit" name="update_profile">Save Changes</button>
-            </form>
-
-        {% else %}
-            <!-- Read-Only Profile View -->
-            <p><strong>Name:</strong> {{ user_data.name }}</p>
-            <p><strong>Age:</strong> {{ user_data.age }}</p>
-            <p><strong>Sex:</strong> {{ user_data.sex }}</p>
-            <p><strong>Weight:</strong> {{ user_data.weight }} kg</p>
-            <p><strong>Height:</strong> {{ user_data.height }} cm</p>
-            <p><strong>BMI:</strong> {{ bmi }} ({{ bmi_category }})</p>
-            <p><strong>Ideal Weight Range:</strong> {{ ideal_weight_min }} kg - {{ ideal_weight_max }} kg</p>
-            <a href="{{ url_for('profile', edit='true') }}"><button>Edit Profile</button></a>
-        {% endif %}
-
-        <!-- Predict Form -->
-        <h3>Make a Prediction</h3>
-        <form action="{{ url_for('profile') }}" method="POST">
-            <label for="inactivity_hours">Hours of Inactivity:</label>
-            <input type="number" name="inactivity_hours" step="0.1" required value="{{ request.form.get('inactivity_hours', '') }}"><br>
-
-            <!-- Filters Button -->
-            <button type="button" onclick="toggleFilters()">Filters</button>
-
-            <!-- Filters Section (Initially Hidden) -->
-            <div id="filters-section" style="display: none;">
-                <h3>Filter Your Meal Suggestions</h3>
+    <h1 class="page-title">NutriDesk</h1>
+    <p class="tagline">Your personal nutrition companion for food recommendations</p>
+    
+    <div class="container">
+        <!-- Left Section -->
+        <div class="left-section">
+            <div class="card">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-title">
+                        {% if user_data %}
+                            <h3>Hello {{ user_data.name }}!</h3>
+                        {% else %}
+                            <h3>Welcome to NutriDesk</h3>
+                        {% endif %}
+                        <p>Manage your health information</p>
+                    </div>
+                </div>
                 
-                <!-- Cuisine Type -->
-                <label for="cuisine">Cuisine Type:</label>
-                <select name="cuisine">
-                    <option value="">Any</option>
-                    <option value="indian" {% if cuisine == 'indian' %}selected{% endif %}>Indian</option>
-                    <option value="italian" {% if cuisine == 'italian' %}selected{% endif %}>Italian</option>
-                    <option value="mexican" {% if cuisine == 'mexican' %}selected{% endif %}>Mexican</option>
-                    <option value="chinese" {% if cuisine == 'chinese' %}selected{% endif %}>Chinese</option>
-                </select><br>
-
-                <!-- Meal Type -->
-                <label for="meal">Meal Type:</label>
-                <select name="meal">
-                    <option value="">Any</option>
-                    <option value="breakfast" {% if meal == 'breakfast' %}selected{% endif %}>Breakfast</option>
-                    <option value="lunch" {% if meal == 'lunch' %}selected{% endif %}>Lunch</option>
-                    <option value="dinner" {% if meal == 'dinner' %}selected{% endif %}>Dinner</option>
-                    <option value="snack" {% if meal == 'snack' %}selected{% endif %}>Snack</option>
-                </select><br>
-
-                <!-- Dish Type -->
-                <label for="dish">Dish Type:</label>
-                <select name="dish">
-                    <option value="">Any</option>
-                    <option value="salad" {% if dish == 'salad' %}selected{% endif %}>Salad</option>
-                    <option value="soup" {% if dish == 'soup' %}selected{% endif %}>Soup</option>
-                    <option value="dessert" {% if dish == 'dessert' %}selected{% endif %}>Dessert</option>
-                </select><br>
-
-                <!-- Diet Labels -->
-                <label for="diet_label">Diet Labels:</label>
-                <select name="diet_label">
-                    <option value="">Any</option>
-                    <option value="balanced" {% if diet_label == 'balanced' %}selected{% endif %}>Balanced</option>
-                    <option value="high-fiber" {% if diet_label == 'high-fiber' %}selected{% endif %}>High-Fiber</option>
-                    <option value="high-protein" {% if diet_label == 'high-protein' %}selected{% endif %}>High-Protein</option>
-                    <option value="low-carb" {% if diet_label == 'low-carb' %}selected{% endif %}>Low Carb</option>
-                    <option value="low-fat" {% if diet_label == 'low-fat' %}selected{% endif %}>Low Fat</option>
-                </select><br>
-
-                <!-- Vegetarian Checkbox -->
-                <label>Vegetarian:</label>
-                <input type="checkbox" name="vegetarian" value="vegetarian" {% if vegetarian %}checked{% endif %}> Yes<br>
-
-                <button type="submit" name="apply_filters">Apply Filters</button>
+                <!-- Profile Section -->
+                {% if user_data %}
+                    <!-- Read-Only Profile View -->
+                    <h3><i class="fas fa-user-circle"></i> Your Profile</h3>
+                    <div class="profile-info">
+                        <div class="profile-data">
+                            <div class="data-row">
+                                <div class="data-label">Name:</div>
+                                <div class="data-value">{{ user_data.name }}</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Age:</div>
+                                <div class="data-value">{{ user_data.age }}</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Sex:</div>
+                                <div class="data-value">{{ user_data.sex }}</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Weight:</div>
+                                <div class="data-value">{{ user_data.weight }} kg</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Height:</div>
+                                <div class="data-value">{{ user_data.height }} cm</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="openEditModal"><i class="fas fa-pencil-alt"></i> Edit Profile</button>
+                {% else %}
+                    <!-- New User Profile Form - Button to open Modal -->
+                    <h3><i class="fas fa-user-plus"></i> Complete Your Profile</h3>
+                    <p>Please add your details to get personalized meal recommendations.</p>
+                    <div class="create-profile-btn-container">
+                        <button id="openNewProfileModal"><i class="fas fa-user-plus"></i> Create Profile</button>
+                    </div>
+                {% endif %}
+                
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="feature-text">Personalized meal plans</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="feature-text">Save time</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="feature-text">Boost productivity</div>
+                    </div>
+                </div>
+                
+                <!-- Moved logout link outside any form or conditional blocks to ensure it's always visible -->
+                <div class="logout-container">
+                    <a href="{{ url_for('logout') }}" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
             </div>
+        </div>
+        
+        <!-- Right Section -->
+        <div class="right-section">
+            <div class="card">
+                {% if user_data %}
+                    <!-- Health Metrics (BMI and Ideal Weight Range) -->
+                    <div class="health-metrics">
+                        <h3><i class="fas fa-heartbeat"></i> Your Health Evaluation</h3>
+                        <p><strong>BMI:</strong> <span class="metric-value">{{ bmi }}</span></p>
+                        <p class="bmi-category">{{ bmi_category }} - {% if bmi_category == 'Underweight' %}You may need to gain some weight{% elif bmi_category == 'Normal' %}Your weight is in a healthy range{% elif bmi_category == 'Overweight' %}Consider some lifestyle adjustments{% elif bmi_category == 'Obese' %}Consider consulting a healthcare professional{% endif %}</p>
+                        <p><strong>Ideal Weight Range:</strong> <span class="metric-value">{{ ideal_weight_min }} kg - {{ ideal_weight_max }} kg</span></p>
+                    </div>
+                    
+                    <!-- Predict Form -->
+                    <div class="prediction-form">
+                        <h3><i class="fas fa-plate-wheat"></i> Let's See What Delicious Wonders Await You</h3>
+                        <form action="{{ url_for('profile') }}" method="POST">
+                            <div class="form-group">
+                                <label for="inactivity_hours">Could you kindly share how many hours you've been physically inactive today?</label>
+                                <input type="number" name="inactivity_hours" step="0.1" required value="{{ request.form.get('inactivity_hours', '') }}" placeholder="Enter hours" class="no-spinners">
+                            </div>
 
-            <!-- Applied Filters Display -->
-            {% if diet_label or cuisine or meal or dish or vegetarian %}
-                <p><strong>Applied Filters:</strong></p>
-                <ul>
-                    {% if diet_label %}<li>Diet Label: {{ diet_label }}</li>{% endif %}
-                    {% if cuisine %}<li>Cuisine: {{ cuisine }}</li>{% endif %}
-                    {% if meal %}<li>Meal Type: {{ meal }}</li>{% endif %}
-                    {% if dish %}<li>Dish Type: {{ dish }}</li>{% endif %}
-                    {% if vegetarian %}<li>Vegetarian: Yes</li>{% endif %}
-                </ul>
-            {% endif %}
+                            <!-- Filters Button -->
+                            <button type="button" id="openFiltersBtn" class="secondary"><i class="fas fa-sliders-h"></i> Dietary Preferences</button>
 
-            <button type="submit" name="predict">Predict</button>
-        </form>
+                            <!-- Applied Filters Display - Fixed capitalization -->
+                            {% if diet_label or cuisine or meal or dish or vegetarian %}
+                                <div class="applied-filters">
+                                    <p><strong><i class="fas fa-filter"></i> Applied Filters:</strong></p>
+                                    <ul>
+                                        {% if diet_label %}
+                                            <li>Diet Label: {{ diet_label[0]|upper }}{{ diet_label[1:] }}</li>
+                                        {% endif %}
+                                        {% if cuisine %}
+                                            <li>Cuisine: {{ cuisine[0]|upper }}{{ cuisine[1:] }}</li>
+                                        {% endif %}
+                                        {% if meal %}
+                                            <li>Meal Type: {{ meal[0]|upper }}{{ meal[1:] }}</li>
+                                        {% endif %}
+                                        {% if dish %}
+                                            <li>Dish Type: {{ dish[0]|upper }}{{ dish[1:] }}</li>
+                                        {% endif %}
+                                        {% if vegetarian %}
+                                            <li>Vegetarian: Yes</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            {% endif %}
 
-        <!-- JavaScript to Show/Hide Filters -->
-        <script>
-            function toggleFilters() {
-                var filtersSection = document.getElementById("filters-section");
-                filtersSection.style.display = (filtersSection.style.display === "none") ? "block" : "none";
+                            <button type="submit" name="predict"><i class="fas fa-magic"></i> Get Meal Recommendations</button>
+                        </form>
+                    </div>
+
+                    <!-- Filters Section (Sliding Panel) -->
+                    <div id="filtersPanel" class="filters-section">
+                        <button class="close-filters" id="closeFiltersBtn"><i class="fas fa-times"></i></button>
+                        <h3><i class="fas fa-filter"></i> Filter Your Meal Suggestions</h3>
+                        
+                        <form action="{{ url_for('profile') }}" method="POST">
+                            <!-- Pass the inactivity hours from the main form to this form -->
+                            <input type="hidden" name="inactivity_hours" value="{{ request.form.get('inactivity_hours', '') }}">
+                            
+                            <!-- Cuisine Type -->
+                            <div class="form-group preference-selector">
+                                <label for="cuisine">Cuisine Type:</label>
+                                <div class="custom-options">
+                                    <div class="option-item {% if cuisine == '' %}selected{% endif %}" data-value="">
+                                        <i class="fas fa-globe"></i>
+                                        <span>Any</span>
+                                    </div>
+                                    <div class="option-item {% if cuisine == 'indian' %}selected{% endif %}" data-value="indian">
+                                        <i class="fas fa-pepper-hot"></i>
+                                        <span>Indian</span>
+                                    </div>
+                                    <div class="option-item {% if cuisine == 'italian' %}selected{% endif %}" data-value="italian">
+                                        <i class="fas fa-pizza-slice"></i>
+                                        <span>Italian</span>
+                                    </div>
+                                    <div class="option-item {% if cuisine == 'mexican' %}selected{% endif %}" data-value="mexican">
+                                        <i class="fas fa-hamburger"></i>
+                                        <span>Mexican</span>
+                                    </div>
+                                    <div class="option-item {% if cuisine == 'chinese' %}selected{% endif %}" data-value="chinese">
+                                        <i class="fas fa-utensils"></i>
+                                        <span>Chinese</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="cuisine" id="cuisine-value" value="{{ cuisine }}">
+                            </div>
+
+                            <!-- Meal Type -->
+                            <div class="form-group preference-selector">
+                                <label for="meal">Meal Type:</label>
+                                <div class="custom-options">
+                                    <div class="option-item {% if meal == '' %}selected{% endif %}" data-value="">
+                                        <i class="fas fa-utensils"></i>
+                                        <span>Any</span>
+                                    </div>
+                                    <div class="option-item {% if meal == 'breakfast' %}selected{% endif %}" data-value="breakfast">
+                                        <i class="fas fa-coffee"></i>
+                                        <span>Breakfast</span>
+                                    </div>
+                                    <div class="option-item {% if meal == 'lunch' %}selected{% endif %}" data-value="lunch">
+                                        <i class="fas fa-burger"></i>
+                                        <span>Lunch</span>
+                                    </div>
+                                    <div class="option-item {% if meal == 'dinner' %}selected{% endif %}" data-value="dinner">
+                                        <i class="fas fa-drumstick-bite"></i>
+                                        <span>Dinner</span>
+                                    </div>
+                                    <div class="option-item {% if meal == 'snack' %}selected{% endif %}" data-value="snack">
+                                        <i class="fas fa-cookie"></i>
+                                        <span>Snack</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="meal" id="meal-value" value="{{ meal }}">
+                            </div>
+
+                            <!-- Dish Type -->
+                            <div class="form-group preference-selector">
+                                <label for="dish">Dish Type:</label>
+                                <div class="custom-options">
+                                    <div class="option-item {% if dish == '' %}selected{% endif %}" data-value="">
+                                        <i class="fas fa-utensils"></i>
+                                        <span>Any</span>
+                                    </div>
+                                    <div class="option-item {% if dish == 'salad' %}selected{% endif %}" data-value="salad">
+                                        <i class="fas fa-leaf"></i>
+                                        <span>Salad</span>
+                                    </div>
+                                    <div class="option-item {% if dish == 'soup' %}selected{% endif %}" data-value="soup">
+                                        <i class="fas fa-mug-hot"></i>
+                                        <span>Soup</span>
+                                    </div>
+                                    <div class="option-item {% if dish == 'dessert' %}selected{% endif %}" data-value="dessert">
+                                        <i class="fas fa-ice-cream"></i>
+                                        <span>Dessert</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="dish" id="dish-value" value="{{ dish }}">
+                            </div>
+
+                            <!-- Diet Labels -->
+                            <div class="form-group preference-selector">
+                                <label for="diet_label">Diet Labels:</label>
+                                <div class="custom-options">
+                                    <div class="option-item {% if diet_label == '' %}selected{% endif %}" data-value="">
+                                        <i class="fas fa-balance-scale"></i>
+                                        <span>Any</span>
+                                    </div>
+                                    <div class="option-item {% if diet_label == 'balanced' %}selected{% endif %}" data-value="balanced">
+                                        <i class="fas fa-sync-alt"></i>
+                                        <span>Balanced</span>
+                                    </div>
+                                    <div class="option-item {% if diet_label == 'high-fiber' %}selected{% endif %}" data-value="high-fiber">
+                                        <i class="fas fa-seedling"></i>
+                                        <span>High-Fiber</span>
+                                    </div>
+                                    <div class="option-item {% if diet_label == 'high-protein' %}selected{% endif %}" data-value="high-protein">
+                                        <i class="fas fa-dumbbell"></i>
+                                        <span>High-Protein</span>
+                                    </div>
+                                    <div class="option-item {% if diet_label == 'low-carb' %}selected{% endif %}" data-value="low-carb">
+                                        <i class="fas fa-bread-slice"></i>
+                                        <span>Low Carb</span>
+                                    </div>
+                                    <div class="option-item {% if diet_label == 'low-fat' %}selected{% endif %}" data-value="low-fat">
+                                        <i class="fas fa-oil-can"></i>
+                                        <span>Low Fat</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="diet_label" id="diet-label-value" value="{{ diet_label }}">
+                            </div>
+
+                            <!-- Vegetarian Toggle Switch -->
+                            <div class="form-group toggle-switch-container">
+                                <label for="vegetarian">Vegetarian:</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" name="vegetarian" value="vegetarian" id="vegetarian" {% if vegetarian %}checked{% endif %}>
+                                    <label for="vegetarian" class="toggle-label"></label>
+                                </div>
+                            </div>
+
+                            <button type="submit" name="apply_filters"><i class="fas fa-check"></i> Apply Filters</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-edit"></i> Edit Your Profile</h3>
+            
+            <form action="{{ url_for('profile') }}" method="POST">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" name="name" value="{{ user_data.name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" name="age" value="{{ user_data.age }}" required class="no-spinners">
+                </div>
+
+                <div class="form-group sex-input">
+                    <label>Sex:</label>
+                    <div class="gender-selector">
+                        <div class="gender-option {% if user_data.sex == 'Male' %}selected{% endif %}" data-value="Male">
+                            <i class="fas fa-mars"></i>
+                            <span>Male</span>
+                        </div>
+                        <div class="gender-option {% if user_data.sex == 'Female' %}selected{% endif %}" data-value="Female">
+                            <i class="fas fa-venus"></i>
+                            <span>Female</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="sex" id="sex-value-edit" value="{{ user_data.sex }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Weight (kg):</label>
+                    <input type="number" name="weight" step="0.1" value="{{ user_data.weight }}" required class="no-spinners">
+                </div>
+
+                <div class="form-group">
+                    <label for="height">Height (cm):</label>
+                    <input type="number" name="height" step="0.1" value="{{ user_data.height }}" required class="no-spinners">
+                </div>
+
+                <button type="submit" name="update_profile"><i class="fas fa-save"></i> Save Changes</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- New User Profile Modal -->
+    <div id="newProfileModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeNewProfileModalBtn"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-user-plus"></i> Create Your Profile</h3>
+            
+            <form action="{{ url_for('profile') }}" method="POST">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" name="age" required class="no-spinners">
+                </div>
+                
+                <div class="form-group sex-input">
+                    <label>Sex:</label>
+                    <div class="gender-selector">
+                        <div class="gender-option" data-value="Male">
+                            <i class="fas fa-mars"></i>
+                            <span>Male</span>
+                        </div>
+                        <div class="gender-option" data-value="Female">
+                            <i class="fas fa-venus"></i>
+                            <span>Female</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="sex" id="sex-value-new" value="Male" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="weight">Weight (kg):</label>
+                    <input type="number" name="weight" step="0.1" required class="no-spinners">
+                </div>
+                
+                <div class="form-group">
+                    <label for="height">Height (cm):</label>
+                    <input type="number" name="height" step="0.1" required class="no-spinners">
+                </div>
+                
+                <button type="submit" name="update_profile" class="save-profile-btn"><i class="fas fa-check-circle"></i> Save Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for Modal and Slide Panels -->
+    <script>
+        // Edit Profile Modal
+        const editProfileModal = document.getElementById('editProfileModal');
+        const openEditModalBtn = document.getElementById('openEditModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        
+        if (openEditModalBtn) {
+            openEditModalBtn.addEventListener('click', function() {
+                editProfileModal.classList.add('active');
+                document.body.classList.add('modal-open');
+            });
+        }
+        
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', function() {
+                editProfileModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            });
+        }
+        
+        // New User Profile Modal
+        const newProfileModal = document.getElementById('newProfileModal');
+        const openNewProfileModalBtn = document.getElementById('openNewProfileModal');
+        const closeNewProfileModalBtn = document.getElementById('closeNewProfileModalBtn');
+        
+        if (openNewProfileModalBtn) {
+            openNewProfileModalBtn.addEventListener('click', function() {
+                newProfileModal.classList.add('active');
+                document.body.classList.add('modal-open');
+            });
+        }
+        
+        if (closeNewProfileModalBtn) {
+            closeNewProfileModalBtn.addEventListener('click', function() {
+                newProfileModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            });
+        }
+        
+        // Filters Panel
+        const filtersPanel = document.getElementById('filtersPanel');
+        const openFiltersBtn = document.getElementById('openFiltersBtn');
+        const closeFiltersBtn = document.getElementById('closeFiltersBtn');
+        
+        if (openFiltersBtn) {
+            openFiltersBtn.addEventListener('click', function() {
+                filtersPanel.classList.add('active');
+                
+                // Synchronize inactivity hours between main form and filters form
+                const mainInactivityInput = document.querySelector('.prediction-form input[name="inactivity_hours"]');
+                const filterInactivityInput = document.querySelector('.filters-section input[name="inactivity_hours"]');
+                
+                if (mainInactivityInput && filterInactivityInput) {
+                    filterInactivityInput.value = mainInactivityInput.value;
+                }
+            });
+        }
+        
+        if (closeFiltersBtn) {
+            closeFiltersBtn.addEventListener('click', function() {
+                filtersPanel.classList.remove('active');
+            });
+        }
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === editProfileModal) {
+                editProfileModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
             }
-        </script>
-
-    {% else %}
-        <h3>Complete Your Profile</h3>
-        <form action="{{ url_for('profile') }}" method="POST">
-            <label for="name">Name:</label>
-            <input type="text" name="name" required><br>
-            <label for="age">Age:</label>
-            <input type="number" name="age" required><br>
-            <label for="sex">Sex:</label>
-            <select name="sex" required>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-            </select><br>
-            <label for="weight">Weight (kg):</label>
-            <input type="number" name="weight" step="0.1" value="{{ user_data.weight }}" required><br>
-
-            <label for="height">Height (cm):</label>
-            <input type="number" name="height" step="0.1" value="{{ user_data.height }}" required><br>
-            <button type="submit" name="update_profile">Save Profile</button>
-        </form>
-    {% endif %}
-    <br>
-    <a href="{{ url_for('logout') }}">Logout</a>
+            if (event.target === newProfileModal) {
+                newProfileModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            }
+        });
+        
+        // Custom Select for Sex in new profile modal
+        const genderOptionsNew = document.querySelectorAll('#newProfileModal .gender-option');
+        const sexValueInputNew = document.getElementById('sex-value-new');
+        
+        genderOptionsNew.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selected class from all options
+                genderOptionsNew.forEach(opt => opt.classList.remove('selected'));
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                // Update hidden input value
+                sexValueInputNew.value = this.getAttribute('data-value');
+            });
+        });
+        
+        // Custom Select for Sex in edit profile modal
+        const genderOptionsEdit = document.querySelectorAll('#editProfileModal .gender-option');
+        const sexValueInputEdit = document.getElementById('sex-value-edit');
+        
+        genderOptionsEdit.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selected class from all options
+                genderOptionsEdit.forEach(opt => opt.classList.remove('selected'));
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                // Update hidden input value
+                sexValueInputEdit.value = this.getAttribute('data-value');
+            });
+        });
+        
+        // Custom Select for filters
+        const customSelects = document.querySelectorAll('.custom-options');
+        
+        customSelects.forEach(select => {
+            const options = select.querySelectorAll('.option-item');
+            const parent = select.closest('.preference-selector');
+            const hiddenInput = parent.querySelector('input[type="hidden"]');
+            
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    // Update hidden input value
+                    hiddenInput.value = this.getAttribute('data-value');
+                });
+            });
+        });
+        
+        // Page load animation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('page-loaded');
+            
+            var cards = document.querySelectorAll('.card');
+            cards.forEach(function(card, index) {
+                card.style.animationDelay = (0.1 * index) + 's';
+                card.classList.add('card-visible');
+            });
+        });
+        
+        // Form submission animation
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                document.body.classList.add('page-transitioning');
+            });
+        });
+    </script>
 </body>
 </html>

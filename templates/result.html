@@ -3,53 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediction Result</title>
+    <title>NutriDesk - Food Recommendations</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles will be in a separate CSS file as requested -->
+    <link rel="stylesheet" href="/static/css/profile.css">
+</head>
+<body>
+    <h1 class="page-title">NutriDesk</h1>
+    <p class="tagline">Your personal nutrition companion for food recommendations.</p>
+    
+    <div class="container">
+        <!-- Left Section -->
+        <div class="left-section">
+            <div class="card">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="profile-title">
+                        <h3>Your Personalized Food Recommendations</h3>
+                        <p>Based on your profile and activity</p>
+                    </div>
+                </div>
+                
+                <!-- Nutritional Requirements -->
+                <div class="health-metrics">
+                    <h3><i class="fas fa-chart-bar"></i> Nutritional Requirements</h3>
+                    <p><strong>Proteins:</strong> <span class="metric-value">{{ proteins }}</span> g</p>
+                    <p><strong>Carbohydrates:</strong> <span class="metric-value">{{ carbs }}</span> g</p>
+                    <p class="bmi-category"><strong>Calories:</strong> <span class="metric-value">{{ calories }}</span> kcal</p>
+                </div>
+                
+                <!-- Food Recommendations -->
+                <h3><i class="fas fa-hamburger"></i> Recommended Food Items</h3>
+                <div class="food-buttons">
+                    {% if food_suggestions %}
+                        {% for food in food_suggestions %}
+                            <button onclick="showDetails({{ loop.index0 }})" class="food-button">
+                                <i class="fas fa-utensils"></i> {{ food.name }}
+                            </button>
+                        {% endfor %}
+                    {% else %}
+                        <p>No matching food found.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Navigation buttons -->
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="feature-text">Personalized meal plans</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="feature-text">Save time</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="feature-text">Boost productivity</div>
+                    </div>
+                </div>
+                
+                <div class="logout-container">
+                    <a href="{{ url_for('profile') }}" class="logout-link"><i class="fas fa-arrow-left"></i> Back to Profile</a>
+                    <a href="{{ url_for('logout') }}" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Section -->
+        <div class="right-section">
+            <div class="card">
+                <!-- Default placeholder message -->
+                <div id="default-message" class="placeholder-message">
+                    <div class="profile-header">
+                        <div class="profile-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="profile-title">
+                            <h3>Food Details</h3>
+                            <p>Select a food item from the left to view details</p>
+                        </div>
+                    </div>
+                    <div class="empty-state">
+                        <i class="fas fa-hand-point-left fa-3x"></i>
+                        <p>Click on any food recommendation button to see detailed information</p>
+                    </div>
+                </div>
+                
+                <!-- Food Details Section -->
+                {% if food_suggestions %}
+                    {% for food in food_suggestions %}
+                        <div id="food-{{ loop.index0 }}" class="food-details" style="display: none;">
+                            <div class="profile-header">
+                                <div class="profile-icon">
+                                    <i class="fas fa-hamburger"></i>
+                                </div>
+                                <div class="profile-title">
+                                    <h3>{{ food.name }}</h3>
+                                    <p>Nutritional information and recipe</p>
+                                </div>
+                            </div>
+                            
+                            <div class="food-image-container">
+                                <img src="{{ food.image }}" alt="{{ food.name }}" class="food-image">
+                            </div>
+                            
+                            <div class="profile-info">
+                                <div class="profile-data">
+                                    <div class="data-row">
+                                        <div class="data-label">Calories:</div>
+                                        <div class="data-value">{{ food.calories }} kcal</div>
+                                    </div>
+                                    <div class="data-row">
+                                        <div class="data-label">Proteins:</div>
+                                        <div class="data-value">{{ food.proteins }}g</div>
+                                    </div>
+                                    <div class="data-row">
+                                        <div class="data-label">Carbohydrates:</div>
+                                        <div class="data-value">{{ food.carbohydrates }}g</div>
+                                    </div>
+                                    <div class="data-row">
+                                        <div class="data-label">Fats:</div>
+                                        <div class="data-value">{{ food.fats }}g</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3><i class="fas fa-list"></i> Ingredients</h3>
+                            <div class="ingredients-list">
+                                <ul>
+                                    {% for ingredient in food.ingredients %}
+                                        <li>{{ ingredient }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <div class="recipe-button-container">
+                                <a href="{{ food.url }}" target="_blank">
+                                    <button><i class="fas fa-external-link-alt"></i> View Full Recipe</button>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional CSS specifically for matching card dimensions from profile page -->
+    <style>
+        /* Match the card dimensions from profile page CSS but ensure scrolling works */
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            flex: 1;
+            min-width: 0;
+            margin-bottom: 20px;
+            position: relative;
+            overflow-y: auto; /* Enable vertical scrolling */
+            height: auto;
+            max-height: 85vh;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .card-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .left-section, .right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Ensure content doesn't cause horizontal overflow */
+        .food-details, .placeholder-message {
+            width: 100%;
+        }
+        
+        /* Existing food button and container styles */
+        .food-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .placeholder-message {
+            text-align: center;
+            color: #666;
+            padding: 40px 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .empty-state {
+            margin-top: 40px;
+            color: #888;
+        }
+        
+        .empty-state i {
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+        
+        /* CHANGE 1: Center the image in the right box */
+        .food-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            width: 100%;
+        }
+        
+        .food-image {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* CHANGE 2: Updated ingredients list styling to match Applied Filters */
+        .ingredients-list {
+            background-color: #f5f9ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0 25px 0;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .ingredients-list ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+        }
+        
+        .ingredients-list li {
+            margin-bottom: 10px;
+            position: relative;
+            padding-left: 25px;
+            line-height: 1.5;
+            break-inside: avoid;
+            font-size: 16px;
+        }
+        
+        .ingredients-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #2196F3;
+            font-size: 20px;
+            line-height: 20px;
+        }
+        
+        /* Improved recipe button styling */
+        .recipe-button-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0 10px 0;
+        }
+        
+        .recipe-button-container button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .recipe-button-container button:hover {
+            background-color: #388e3c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+        }
+        
+        .recipe-button-container button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+        }
+        
+        /* Make sure the recipe button displays correctly on small screens */
+        @media (max-width: 600px) {
+            .ingredients-list ul {
+                columns: 1;
+            }
+        }
+        
+        /* Fix scrolling issues on mobile */
+        @media (max-width: 768px) {
+            .card {
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+            }
+        }
+    </style>
+
+    <!-- JavaScript for showing food details -->
     <script>
         function showDetails(index) {
+            // Hide default message
+            document.getElementById("default-message").style.display = "none";
+            
+            // Hide all food details
             var foodItems = document.getElementsByClassName("food-details");
             for (var i = 0; i < foodItems.length; i++) {
                 foodItems[i].style.display = "none";
             }
-            document.getElementById("food-" + index).style.display = "block";
+            
+            // Show the selected food item with animation
+            var selectedFood = document.getElementById("food-" + index);
+            selectedFood.style.display = "block";
+            
+            // Highlight the selected button
+            var buttons = document.getElementsByClassName("food-button");
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove("selected");
+            }
+            buttons[index].classList.add("selected");
+            
+            // Add selected button styling
+            document.head.insertAdjacentHTML('beforeend', `
+                <style>
+                    .food-button.selected {
+                        background-color: #2d8a31;
+                        transform: translateY(0);
+                        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+                    }
+                </style>
+            `);
         }
+        
+        // Add page load animation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('page-loaded');
+            
+            var cards = document.querySelectorAll('.card');
+            cards.forEach(function(card, index) {
+                card.style.animationDelay = (0.1 * index) + 's';
+                card.classList.add('card-visible');
+            });
+            
+            // Show default message by default
+            document.getElementById("default-message").style.display = "block";
+            
+            // Hide all food details initially
+            var foodDetails = document.getElementsByClassName("food-details");
+            for (var i = 0; i < foodDetails.length; i++) {
+                foodDetails[i].style.display = "none";
+            }
+        });
     </script>
-</head>
-<body>
-    <h2>Prediction Results</h2>
-    <p><strong>Predicted Proteins:</strong> {{ proteins }} g</p>
-    <p><strong>Predicted Carbohydrates:</strong> {{ carbs }} g</p>
-    <p><strong>Predicted Calories:</strong> {{ calories }} kcal</p>
-
-    <h2>Recommended Food Item</h2>
-    {% if food_suggestions %}
-    {% for food in food_suggestions %}
-        <button onclick="showDetails({{ loop.index0 }})">{{ food.name }}</button>
-    {% endfor %}
-
-    <hr>
-
-    {% for food in food_suggestions %}
-        <div id="food-{{ loop.index0 }}" class="food-details" style="display: none;">
-            <h3>{{ food.name }}</h3>
-            <img src="{{ food.image }}" alt="Food Image" width="200"><br>
-            <p><strong>Calories:</strong> {{ food.calories }} kcal</p>
-            <p><strong>Proteins:</strong> {{ food.proteins }}g</p>
-            <p><strong>Carbohydrates:</strong> {{ food.carbohydrates }}g</p>
-            <p><strong>Fats:</strong> {{ food.fats }}g</p>
-            <p><strong>Ingredients:</strong></p>
-            <ul>
-                {% for ingredient in food.ingredients %}
-                    <li>{{ ingredient }}</li>
-                {% endfor %}
-            </ul>
-            <a href="{{ food.url }}" target="_blank"><button>View Recipe</button></a>
-        </div>
-    {% endfor %}
-    {% else %}
-        <p>No matching food found.</p>
-    {% endif %}
-    <br>
-    <a href="{{ url_for('profile') }}"><button>Back to Profile</button></a>
-    <a href="{{ url_for('logout') }}"><button>Logout</button></a>
 </body>
 </html>

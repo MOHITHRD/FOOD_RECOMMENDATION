@@ -1,67 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NutriDesk - Login</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/signup_styles.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriDesk - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sign_up.css') }}">
 </head>
 <body>
-<div class="left">
-  <div class="bowl-container">
-    <img src="{{ url_for('static', filename='images/food_bowl.jpg') }}" class="bowl-image" alt="Healthy food bowl">
-  </div>
-</div>
-<div class="right">
-  <div class="content-wrapper">
-    <h1>NutriDesk</h1>
-    <p class="tagline">Smart, personalized meal recommendations based on your lifestyle and daily activity, powered by AI.</p>
-    
-    <!-- Flash messages (for errors or success messages) -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="flash-message" style="color: {% if category == 'danger' %}red{% else %}green{% endif %};">
-      {{ message }}
+    <div class="left">
+        <div class="bowl-container">
+            <img src="{{ url_for('static', filename='images/food_bowl.jpg') }}" class="bowl-image" alt="Healthy food bowl">
+        </div>
     </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-    
-    <form action="{{ url_for('login') }}" method="POST">
-      <div class="input-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
-      </div>
-      
-      <div class="input-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-      </div>
-      
-      <button type="submit">Login</button>
-    </form>
-    
-    <p class="login-link">Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
-    
-    <div class="benefits">
-      <p class="benefits-title">Why choose NutriDesk?</p>
-      <div class="benefits-grid">
-        <div class="benefit-item">
-          <div class="benefit-icon">🍽️</div>
-          <p class="benefit-text">Personalized meal plans</p>
+    <div class="right">
+        <div class="content-wrapper">
+            <h1>NutriDesk</h1>
+            <p class="tagline">Smart, personalized meal recommendations based on your lifestyle and daily activity, powered by AI.</p>
+            
+            <!-- Flash messages (for errors or success messages) -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% set latest_message = messages[-1] %}
+                    <div class="flash-message" style="color: {% if latest_message[0] == 'danger' %}red{% else %}green{% endif %};">
+                        {{ latest_message[1] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form action="{{ url_for('login') }}" method="POST">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            
+            <p class="login-link">Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+            
+            <div class="benefits">
+                <p class="benefits-title">Why choose NutriDesk?</p>
+                <div class="benefits-grid">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🍽️</div>
+                        <p class="benefit-text">Personalized meal plans</p>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">⏰</div>
+                        <p class="benefit-text">Save time</p>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">💪</div>
+                        <p class="benefit-text">Boost productivity</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="benefit-item">
-          <div class="benefit-icon">⏰</div>
-          <p class="benefit-text">Save time planning</p>
-        </div>
-        <div class="benefit-item">
-          <div class="benefit-icon">💪</div>
-          <p class="benefit-text">Boost productivity</p>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 </body>
 </html>
