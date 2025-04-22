@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from model.model import predict  # Importing your prediction function
 import time
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required, UserMixin # For login authentication
-
+# hashing password for security and authentication
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # For Edamam API Key .env loading
 import os
@@ -74,8 +75,6 @@ class Prediction(db.Model):
     calories = db.Column(db.Float, nullable=False)
 
 
-# hashing password for security and authentication
-from werkzeug.security import generate_password_hash, check_password_hash
 
 
 # Function so that Flask-Login can retreive users

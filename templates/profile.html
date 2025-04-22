@@ -101,6 +101,12 @@
         <!-- Right Section -->
         <div class="right-section">
             <div class="card">
+                {% if not user_data %}
+                    <img src="{{ url_for('static', filename='images/profile.jpg') }}"
+                    alt="Welcome to NutriDesk!"
+                    style="width:100%; height:100%; border-radius:8px; display:block; margin:0 auto;">
+                {% endif %}
+
                 {% if user_data %}
                     <!-- Health Metrics (BMI and Ideal Weight Range) -->
                     <div class="health-metrics">
